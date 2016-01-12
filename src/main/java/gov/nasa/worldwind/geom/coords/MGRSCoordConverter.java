@@ -262,6 +262,9 @@ class MGRSCoordConverter
             {
                 latitude = UPS.getLatitude().radians;
                 longitude = UPS.getLongitude().radians;
+
+                // Resets the error code so the conversion doesn't fail
+                error_code = MGRS_NO_ERROR;
             }
             else
                 error_code = MGRS_UPS_ERROR;
@@ -287,7 +290,7 @@ class MGRSCoordConverter
      *
      * @return the corresponding <code>MGRSComponents</code> or <code>null</code>.
      */
-    private MGRSComponents breakMGRSString(String MGRSString)
+    private MGRSComponents breakMGRSString(String MGRSString, boolean usingUpsFormat)
     {
         int num_digits;
         int num_letters;
@@ -319,7 +322,7 @@ class MGRSCoordConverter
                 if ((zone < 1) || (zone > 60))
                     error_code |= MGRS_STRING_ERROR;
             }
-            else
+            else if(!usingUpsFormat) // Add error code if not using ups format
                 error_code |= MGRS_STRING_ERROR;
         j = i;
 
@@ -501,7 +504,7 @@ class MGRSCoordConverter
         double northing = 0;
         UTMCoord UTM = null;
 
-        MGRSComponents MGRS = breakMGRSString(MGRSString);
+        MGRSComponents MGRS = breakMGRSString(MGRSString, false);
         if (MGRS == null)
             error_code |= MGRS_STRING_ERROR;
         else
@@ -1053,7 +1056,7 @@ class MGRSCoordConverter
         String hemisphere;
         double easting, northing;
 
-        MGRSComponents mgrs = breakMGRSString(MGRS);
+        MGRSComponents mgrs = breakMGRSString(MGRS, true);
         if (mgrs == null)
             error_code = this.last_error;
 
@@ -1080,7 +1083,7 @@ class MGRSCoordConverter
             {
                 hemisphere = AVKey.SOUTH;
 
-                ltr2_low_value = upsConstants[mgrs.latitudeBand][12]; //.ltr2_low_value;
+                ltr2_low_value = upsConstants[mgrs.latitudeBand][1]; //.ltr2_low_value;
                 ltr2_high_value = upsConstants[mgrs.latitudeBand][2]; //.ltr2_high_value;
                 ltr3_high_value = upsConstants[mgrs.latitudeBand][3]; //.ltr3_high_value;
                 false_easting = upsConstants[mgrs.latitudeBand][4]; //.false_easting;
